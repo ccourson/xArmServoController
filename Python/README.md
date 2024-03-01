@@ -11,6 +11,8 @@
     * [*class* Controller](#controller)
     * [setPosition](#setposition)
     * [getPosition](#getposition)
+    * [writeServoId](#writeservoid)
+    * [listServos](#listservos)
     * [servoOff](#servooff)
     * [getBatteryVoltage](#getbatteryvoltage)
 * [Things left To-Do](#to-do)
@@ -77,9 +79,13 @@ import xarm
 # arm is the first xArm detected which is connected to USB
 arm = xarm.Controller('USB')
 print('Battery voltage in volts:', arm.getBatteryVoltage())
+
+servos = arm.listServos()
+print('Servos: ', servos)
 ```
 Output:
 > Battery voltage: 7.677
+> Servos: [1, 2, 3, 4, 5, 6]
 
 The Controller can connect to a specific xArm by appending the serial number to "USB". To find the serial number of your xArm, turn on debug, then after connecting one xArm, run this code.
 
@@ -97,7 +103,7 @@ Now knowing the serial number you can connect to a specific xArm like this examp
 import xarm
 
 arm1 = xarm.Controller('USB497223563535')
-arm2 = xarm.Controller('USB497253743535')
+arm2 = xarm.Controller('USB', usb_path='2-1.2.1.2:1.0')
 
 print('Battery voltage of arm1 in volts:', arm1.getBatteryVoltage())
 
@@ -259,6 +265,60 @@ position = arm.getPosition([servo1, servo2, servo3])
 print('Servo 1 position (degrees):', servo1.angle)
 print('Servo 2 position (degrees):', servo2.angle)
 print('Servo 3 position (degrees):', servo3.angle)
+```
+</dd></dl>
+
+<a id="writeservoid"></a>
+**writeServoId**(__[__*new_servo_id=0, overwrite_all_servo_ids=False*__]__)
+<dl><dd>
+Writes the provided <code>new_servo_id</code> to <em>all</em> connected servos.
+
+*NOTE:* the BusServoInfoWrite (0x1b) command passes the write command to *all* connected servos.
+**Use with caution!** For example, If you buy replacement servos and need to update the servo id from
+the manufacturer's default of (1), you will need to disconnect the servo chain first and plug *only* the
+replacement servo into the board to update its id. After it's programmed, you can plug the other servo(s)
+back in.
+
+If you want to do a mass update of all connected servos to the same id, then you can pass
+<code>overwrite_all_servo_ids=True</code> to state your intention.
+
+```py
+import xarm
+
+arm = xarm.Controller('USB')
+
+# writes the servo id=2 to all connected servos
+# this will fail if there are >1 connected servos
+arm.writeServoId(2)
+
+# this will write servo id=2 to all connected servos
+# even if there are >1 connected servos
+arm.writeServoId(2, overwrite_all_servo_ids=True)
+```
+</dd></dl>
+
+
+
+<a id="listservos"></a>
+**listServos**(__[__maximum_servo_id=6__]__)
+<dl><dd>
+Lists all connected servos by attempting to get their position. This is
+a somewhat expensive operation, so by default it stops at 6 which is how many
+the LewanSoul xArm has. The maximumn value is 254, according to the
+manufacturer's specification.
+
+```py
+import xarm
+
+arm = xarm.Controller('USB')
+
+# Lists all servos
+servos = arm.listServos()
+print(servos)
+
+# only find out if the first servo is connected
+servos = arm.listServos(maximum_servo_id=1)
+print(servos)
 ```
 </dd></dl>
 
