@@ -175,7 +175,7 @@ Moves one or more <em>servos</em> to a specified <em>position</em> over a <em>du
 
 When <em>servos</em> is an <em>int</em> value, it represents a servo ID and the <em>position</em> parameter is required.
 
-The <em>position</em> paramter may be an <em>int</em> to indicate a unit position (0 to 1000) or a <em>float</em> to indicate an angle in degrees (-125.0 to 125.0).
+The <em>position</em> paramter may be an <em>int</em> to indicate a unit position or a <em>float</em> to indicate an angle in degrees (-125.0 to 125.0). By default (`learm=False`), the range for unit positions is (0 to 1000), and for `learm=True`, it is 500-2500 (for all IDs from 2 to 6) and 1500-2500 for ID:1 (gripper).
 
 ```py
 # Set servo ID 1 to position 500.

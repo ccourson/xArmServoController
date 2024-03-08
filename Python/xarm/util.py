@@ -10,6 +10,23 @@ class Util:
     @staticmethod
     def _x_round(x):
         return float(round(x*4) / 4)
+    
+    @staticmethod
+    def _learm_joint_constraints(servo : int) -> tuple[int,int]:
+        # https://github.com/ccourson/xArmServoController/issues/5#issuecomment-1908425827
+        if servo == 1:
+            return (1500,2500)
+        elif servo in range(2,7):
+            return (500,2500)
+            
+    @staticmethod
+    def _learm_angle_to_position(servo: int, degrees : float):
+        if not isinstance(degrees, float) or degrees < -125.0 or degrees > 125.0:
+            raise ValueError('Parameter \'degrees\' must be a float value between -125.0 and 125.0')
+        x = Util._x_round(degrees)
+        y = Util._invlerp(-125.0, 125.0, x)
+        _joint_costraints : tuple[int,int] = Util._learm_joint_constraints(servo = servo)
+        return int(Util._lerp(_joint_costraints[0], _joint_costraints[1], y))
 
     @staticmethod
     def _angle_to_position(degrees):

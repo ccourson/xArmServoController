@@ -33,19 +33,27 @@ class Controller:
         self.debug = debug
         self._input_report = []
 
-    def setPosition(self, servos, position=None, duration=1000, wait=False):
+    def setPosition(self, servos, position=None, duration=1000, wait=False, learm=False):
+        # Learm only supported for servos with int/float
         data = bytearray([1, duration & 0xff, (duration & 0xff00) >> 8])
-
         if isinstance(servos, int) or isinstance(servos, float):
             if position == None:
                 raise ValueError('Parameter \'position\' missing.')
             if isinstance(position, int):
-                if position < 0 or position > 1000:
-                    raise ValueError('Parameter \'position\' must be between 0 and 1000.')
+                if not learm:
+                    if position < 0 or position > 1000:
+                        raise ValueError('Parameter \'position\' must be between 0 and 1000.')
+                else:
+                    min_max_constraint : tuple[int,int] = Util._learm_joint_constraints(servo=servos)
+                    if position < min_max_constraint[0] or position > min_max_constraint[1]:
+                        raise ValueError(f'Parameter \'position\' must be between {min_max_constraint[0]} and {min_max_constraint[1]}.')
             if isinstance(position, float):
                 if position < -125.0 or position > 125.0:
                     raise ValueError('Parameter \'position\' must be between -125.0 and 125.0.')
-                position = Util._angle_to_position(position)
+                if not learm:
+                    position = Util._angle_to_position(position)
+                else:
+                    position = Util._learm_angle_to_position(position)
             data.extend([servos, position & 0xff, (position & 0xff00) >> 8])
         elif isinstance(servos, Servo):
             data.extend([servos.servo_id, servos.position & 0xff, (servos.position & 0xff00) >> 8])
